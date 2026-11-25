@@ -1,0 +1,25 @@
+{
+ "format_version": 1,
+ "inputs": {
+  "CAD/Ball/STL/Orange_Ball_R30_Spherical_Markers.stl": "ccc8e9ff9fb7d8d400967f9aed14211d0f3e3939576bbc9c98a1f6baa94fb234",
+  "CAD/Gripper/STL/Assembly_Conical_Cylinder.stl": "d22d6b05dc73e789298f7e041203cfea673f54d8c13c31a17c4917a2836da8ab",
+  "CAD/Stand/STL/Assembly_Robot_Stand.stl": "61847cca8505790ba90be9ef58faf1f2a921aba4e248e01cb997cf2525153542"
+ },
+ "meshes": {
+  "meshes/ball.stl": "ccc8e9ff9fb7d8d400967f9aed14211d0f3e3939576bbc9c98a1f6baa94fb234",
+  "meshes/cup.stl": "d22d6b05dc73e789298f7e041203cfea673f54d8c13c31a17c4917a2836da8ab",
+  "meshes/stand.stl": "b06bf68953c78ab748e2b8857ef5269dc52c73bc9f26f062c486e65c234fdd73"
+ },
+ "stand": {
+  "faces": 20000,
+  "merge_distance_mm": 0.0001,
+  "target_faces": 20000,
+  "tool": "Blender 4.2.8 LTS"
+ },
+ "vendored": {
+  "commit": "fb36886b3023db08c198264e1e9956ab202c3e3b",
+  "folder": "universal_robots_ur10e",
+  "source": "google-deepmind/mujoco_menagerie",
+  "tree": "466f0ad824356ae94da5f514e55d630ca67071c7"
+ }
+}

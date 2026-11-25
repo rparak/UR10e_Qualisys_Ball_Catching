@@ -1,0 +1,323 @@
+## =========================================================================== ##
+#   Description:
+#     The configuration of the ball-catching simulation (SPEC §8).
+#     Read only by src/Configuration/Core.py (Load_Configuration); written by hand.
+#
+#   REQUIRED: every field is required; a missing or invalid field fails the load, naming it.
+#   Units: in brackets after each field's comment; [m] lengths, [deg] angles (converted to [rad] by
+#     the loader).
+#   Frames: the robot base frame (robot base at the origin, z up, the thrower at -y, throwing towards
+#     +y; the frame decision, owner, 2026-11-11, option A, SPEC §14.4). Transform maps the
+#     recordings' frame (QTM, z up) into it (SPEC §7.3) and puts the real releases inside the Throw
+#     cuboid.
+#   Paths: repository-relative; a script's --out DIR replaces the folder and keeps the file name.
+## =========================================================================== ##
+
+# The areas of the experiment: the throw, flight and catch cuboids and the robot's catch area.
+Areas:
+  # The cuboid the ball is thrown from.
+  Throw:
+    # The support of the releases, not their sampling distribution (F6 proposes it). Source: the 44
+    # identification releases as F3 uses them (the first sample after the 40 ms trim, by the transform
+    # below): x [-1.96, 1.71], y [-6.46, -4.04], z [0.82, 1.73] m = their bounding box + 0.20 m
+    # (assumed), rounded outwards to 0.01 m; 100 Hz ON Experiment 6 excluded (its first kept sample is
+    # 0.236 m below its apex: a late start). Owner, 2026-11-11, Q5 (SPEC §8.1). [m] REQUIRED.
+    Centre: [-0.125, -5.25, 1.275]
+    # Edge lengths along x, y, z, each > 0. Source: as Centre. [m] REQUIRED.
+    Size: [3.67, 2.42, 0.91]
+  # The cuboid the ball flies through; a throw is detected inside it.
+  Flight:
+    # Centre of the cuboid. Source: the 2022 Blender scene's flight area (Blender/Area.blend of 0e59db2,
+    # SPEC §4.4), the earlier code's Cuboid([0.0, 3.0, 2.25], ...) mirrored to -y; all 45 identification
+    # flights have samples inside (owner, 2026-11-11, Q5). [m] REQUIRED.
+    Centre: [0.0, -3.0, 2.25]
+    # Edge lengths along x, y, z, each > 0. Source: as Centre (the earlier code's size). [m] REQUIRED.
+    Size: [4.0, 4.0, 3.5]
+  # The catch area (owner, 2026-11-20, F4 Q6 A; the rule of 2026-11-21, F4 Part A addendum, B800): where the
+  # robot may catch. Source: scripts/Maintenance/derive.py workspace (2026-11-21, SPEC §4.10): chosen together with
+  # Robot.Ready_Pose, the largest cuboid of lattice points (step Catch.Workspace_Step) where a catch pose with the
+  # Catch margins exists for all 25 arrival directions and which the robot reaches from the ready pose within
+  # 0.7 s at the nominal Robot.Joint_Accelerations, x 0.50...0.90, y -0.60...0.25, z 0.60...1.20 m, shrunk by one
+  # step on every face. The available time of each throw is still tested per throw (F9, F10). Pinned by
+  # test/Catch/test_core.py (slow).
+  Catch:
+    # Centre of the cuboid. [m] REQUIRED.
+    Centre: [0.7, -0.175, 0.9]
+    # Edge lengths along x, y, z, each > 0. [m] REQUIRED.
+    Size: [0.3, 0.75, 0.5]
+  # The robot's catch area: a sphere, hemisphere or quarter sphere about the robot.
+  Robot:
+    # Shape: sphere, hemisphere or quarter_sphere. Source: owner, 2026-11-09 (SPEC §4.4). [-] REQUIRED.
+    Shape: hemisphere
+    # Centre: 0.1807 m (the UR10e shoulder height) + 0.18 m above the base, as in the earlier code.
+    # Source: owner, 2026-11-09 (SPEC §4.4). [m] REQUIRED.
+    Centre: [0.0, 0.0, 0.3607]
+    # Orientation as rotations about x, y, z (applied X then Y then Z). Source: the earlier code,
+    # Modular_Sphere(..., [0.0, 0.0, -90.0], ...) (SPEC §4.4). [deg] REQUIRED.
+    Orientation: [0.0, 0.0, -90.0]
+    # Radius, > 0. Source: owner, 2026-11-09 (SPEC §4.4). [m] REQUIRED.
+    Radius: 1.0
+
+# The transform from the recordings' frame (QTM) to the robot base frame: p_robot = R p_QTM + Position,
+# R = R_x R_y R_z of Orientation, as for the areas (SPEC §7.2, §7.3). Assumed: no hand-eye result exists.
+Transform:
+  # Rotations about x, y, z. Source: owner, 2026-11-09 (SPEC §7.3), assumed. [deg] REQUIRED.
+  Orientation: [0.0, 0.0, 180.0]
+  # Translation added after the rotation: puts the median point where the recorded flights descend
+  # through z = 0.8607 m, measured (0.827, -4.170) m in the QTM frame on 68 flights, at
+  # (0, -0.5, 0.8607) m. Source: owner, 2026-11-09 (SPEC §7.3), assumed. [m] REQUIRED.
+  Position: [0.827, -4.670, 0.000]
+
+# The outputs of the recording loader (scripts/Maintenance/derive.py recordings; SPEC §8).
+Recording:
+  # One row per recording: its counts, the segmented flight, its set. [path] REQUIRED.
+  Summary_File: Data/Generated/Recordings/recording_summary.csv
+  # Every gap, zero step, irregular step and ambiguous step, with file and line. [path] REQUIRED.
+  Steps_File: Data/Generated/Recordings/recording_steps.csv
+
+# The flight model a = g - k |v| v (SPEC §2.3, §7.4): gravity along -z and quadratic drag. The model is
+# the same in the QTM and the robot frame (the transform rotates about z only).
+Flight:
+  # The magnitude of gravity, > 0. Source: assumed (the F3 bias fit agrees within 0.01 m/s^2, SPEC
+  # §4.2). [m/s^2] REQUIRED.
+  Gravity: 9.81
+  # The drag constant k, >= 0 (0: the vacuum model). Source: scripts/Maintenance/derive.py identify at commit e72d93d
+  # (F3, 2026-11-10): the 45 identification flights of F2's segmentation (tau = 20 mm) with the first
+  # 40 ms trimmed, one joint k (SPEC §4.2, §7.3). Pinned by test/scripts/test_catch.py. [1/m] REQUIRED.
+  Drag: 0.00930496257
+  # One standard deviation of Drag, >= 0: the bootstrap sd over flights (0.000157489219) and the
+  # half-range of the sensitivity rows (0.000186851872) in quadrature. Source: identify, as Drag. [1/m] REQUIRED.
+  Drag_Std: 0.000244369548
+
+# The outputs of the flight-model identification (scripts/Maintenance/derive.py identify; SPEC §9.8).
+Identification:
+  # The identified values, the sensitivity rows and the validation rows. [path] REQUIRED.
+  Summary_File: Data/Generated/Identification/identification_summary.csv
+  # One row per fitted flight (identification and validation). [path] REQUIRED.
+  Flights_File: Data/Generated/Identification/identification_flights.csv
+  # One row per identify run that read the validation flights (the count, SPEC §2.13). [path] REQUIRED.
+  Ledger_File: Data/Generated/Identification/identification_ledger.csv
+
+# The observation error model M4 (SPEC §7.5, §8.1; owner, 2026-11-11, F6 Q1, Q2), per axis x, y, z of the
+# robot frame: white Student-t noise, a drift continuous in time and an offset that moves only while the
+# ball is lost. Source of every value: scripts/Maintenance/derive.py observation (F6), the deterministic estimator on
+# the 45 identification flights of F2's segmentation with the first 40 ms trimmed, fitted under Flight
+# above; the validation flights are never read. Pinned by test/scripts/test_catch.py. These are effective
+# calibration values, chosen to make simulated observations match the real ones (SPEC §2.13.5), not
+# physically identified quantities: they are only partly identified by 45 flights, and under M4's own model
+# the estimator under-reads the offset by about half (owner, 2026-11-11, F6 addendum Q2; KNOWN_ISSUES).
+# The offset and the white noise are bounded (Offset_Bound, White_Bound; owner, 2026-11-15), so their variances
+# in a dataset are below Offset_Std^2 and White_Std^2 (SPEC §7.5). The statistics outside their bounds are in
+# SPEC §9.9 and KNOWN_ISSUES.
+Observation:
+  # The white noise's standard deviation per axis, each >= 0. [m] REQUIRED.
+  White_Std: [0.000370011195, 0.000803520496, 0.000242729141]
+  # The white noise's Student-t degrees of freedom, > 2 (the lowest value of the estimator's grid: the
+  # in-run tails are heavier still). [-] REQUIRED.
+  White_Dof: 2.1
+  # The drift's stationary standard deviation per axis, each >= 0. [m] REQUIRED.
+  Drift_Std: [0.0019717258, 0.00319042089, 0.00297464373]
+  # The drift's time constant, > 0. [s] REQUIRED.
+  Drift_Time: 0.08
+  # The offset's stationary standard deviation per axis, each >= 0. [m] REQUIRED.
+  Offset_Std: [0.00932578562, 0.0124212851, 0.00584368324]
+  # The offset's time constant in the lost time, > 0. [s] REQUIRED.
+  Offset_Time: 0.1
+  # The Student-t degrees of freedom of the offset's innovations, > 2 (weakly identified: its tail ratio is
+  # flat near 2.2-2.5; with the pairs in a canonical order the estimate no longer depends on the order of
+  # the flights, F6 addendum Q3; spread KNOWN_ISSUES). [-] REQUIRED.
+  Offset_Dof: 2.5
+  # The largest norm of the offset vector, > 0; an offset beyond it is drawn again. Source: scripts/catch.py
+  # observation: the largest residual norm of the 45 identification flights under Flight above, 55.9 mm (200 Hz
+  # OFF Experiment 29; its run mean 55.2 mm), x 1.25 (assumed), rounded up to 0.005 m. Without it the Student-t
+  # offset reached 3.7 m (owner, 2026-11-15, Q1). [m] REQUIRED.
+  Offset_Bound: 0.070
+  # The largest norm of the white-noise vector of one sample, > 0; one beyond it is drawn again. Source:
+  # observation: the largest step between adjacent samples inside a run on the identification flights,
+  # 29.5 mm, x 1.25 (assumed), rounded up to 0.005 m (owner, 2026-11-15, Q1, Q2). [m] REQUIRED.
+  White_Bound: 0.040
+  # The estimation's summary: the parameters, their spread and every statistic against its bound
+  # (scripts/Maintenance/derive.py observation; SPEC §9.9). [path] REQUIRED.
+  Summary_File: Data/Generated/Observation/observation_summary.csv
+
+# The robot's limits and its ready pose (SPEC §8.1; F4). Joints in the order shoulder_pan, shoulder_lift,
+# elbow, wrist_1, wrist_2, wrist_3 (src/Robot/Core.py).
+Robot:
+  # The joints' speed limits, each > 0. Source: UR10e Technical specification, updated October 2026,
+  # universal-robots.com, read 2026-11-09 (SPEC §4.3): base and shoulder 120, elbow and wrists 180 deg/s.
+  # [deg/s] REQUIRED.
+  Joint_Speed: [120.0, 120.0, 180.0, 180.0, 180.0, 180.0]
+  # The joints' acceleration limit, each > 0: the nominal first, then the one every result of the catch is
+  # also reported at. ASSUMED: 800 deg/s^2 is UR's recommendation, no published limit (SPEC §4.3); 400 deg/s^2
+  # halves it, because the reach in time depends on it strongly (owner, 2026-11-20; KNOWN_ISSUES). [deg/s^2]
+  # REQUIRED.
+  Joint_Accelerations: [800.0, 400.0]
+  # The pose the robot waits in before a throw, each in [-360, 360]; joint 6 is unused (the cup is symmetric
+  # about its axis) and 0. Source: scripts/Maintenance/derive.py workspace (2026-11-21, SPEC §4.10): among the catch poses of
+  # the cone's centre direction at the qualifying lattice points, the one whose cuboid of qualifying points
+  # reached within 0.7 s at the nominal acceleration is the largest (owner, 2026-11-21, F4 Part A addendum,
+  # B800; a heuristic search); the cup's mouth at (0.80, 0.10, 1.10) m, inside Areas.Catch. [deg] REQUIRED.
+  Ready_Pose: [29.972673, -104.916569, -88.564625, -57.375802, -61.349913, 0.0]
+
+# The catch pose's criteria and the arrival cone (SPEC §7.11, §8.1; F4). A point qualifies when, for every
+# arrival direction, a joint vector puts the centre of the cup's mouth on it with the cup's axis against the
+# ball's velocity and meets all three margins.
+Catch:
+  # The margin each joint keeps to its range, > 0. ASSUMED (owner, 2026-11-20, F4 Q4). [deg] REQUIRED.
+  Joint_Margin: 10.0
+  # The smallest exact distance to the stand and the floor and between the robot's parts, > 0 (the vendored
+  # forearm and wrist-2 capsules, 0.036-0.046 m apart in every pose, are held apart only). ASSUMED (owner,
+  # 2026-11-20, F4 Q4). [m] REQUIRED.
+  Clearance: 0.05
+  # The smallest speed of the tool centre point in every direction with the cup's axis held, within the joint
+  # speeds: the distance from a singularity, > 0. ASSUMED (owner, 2026-11-20, F4 Q4). [m/s] REQUIRED.
+  Speed_Margin: 0.5
+  # The arrival cone, [min, max]: the ball's velocity below the horizontal in [0, 90], and from +y towards +x
+  # in [-180, 180]; 5 x 5 directions over it, its edges included. Source: the 0.5 and 99.5 % quantiles of
+  # the descending samples of the train partition of the dataset Default inside Areas.Robot (F4 Part A:
+  # 44.4-67.7 and -24.6-26.1 deg), rounded outwards to 1 deg; scripts/Maintenance/derive.py workspace measures them again
+  # (owner, 2026-11-20, F4 Q12). [deg] REQUIRED.
+  Arrival_Elevation: [44.0, 68.0]
+  Arrival_Azimuth: [-25.0, 27.0]
+  # The step of the workspace's lattice, > 0 (owner, 2026-11-20, F4 Part A §4). [m] REQUIRED.
+  Workspace_Step: 0.05
+
+# The workspace command (scripts/Maintenance/derive.py workspace; SPEC §9.11).
+Workspace:
+  # The dataset whose train partition gives the throws (the arrival cone's check, the ready pose's search);
+  # only its train partition is read (owner, 2026-11-20, F4 Q7). [path] REQUIRED.
+  Dataset: Data/Generated/Datasets/Default
+  # The workspace map: every lattice point, whether it qualifies and its qualifying poses. [path] REQUIRED.
+  Map_File: Data/Generated/Workspace/workspace_map.npz
+  # The workspace summary: the area, the ready pose, the reach at both accelerations. [path] REQUIRED.
+  Summary_File: Data/Generated/Workspace/workspace_summary.csv
+
+# The catch decision (the first stage of scripts/catch.py catch; SPEC §2.8, §7.11, §8.1, §9.12; F9; owner, 2026-11-21):
+# go or no-go from the
+# predicted trajectory of a prefix, against the truth of each simulated throw (Areas.Catch, the Catch criteria, the
+# time from Robot.Ready_Pose at both Robot.Joint_Accelerations). Simulated throws only (SPEC §2.14).
+Decision:
+  # The datasets catch evaluates, each its folder and the SHA-256 of its flights.npz (from its manifest.json); a dataset
+  # with another hash, or whose manifest's model hash differs from this file's Flight and Observation, is refused.
+  # Catch_In and Catch_Near are Config/dataset.yaml with Dataset.Name, Dataset.Seed (20261121, 20261122), Dataset.Flights
+  # (10000, 20000), the Partitions 0.10 / 0.45 / 0.45 and Throw.Target_Catch_Area.Margin 0 and 0.25 m instead of
+  # Throw.Target_Area (owner, 2026-11-21, F9 Q2, Q3); Default is the general throws. Source: the datasets' manifests
+  # (scripts/catch.py dataset at e0abc4f, 2026-11-21; Default at 6be743d). [path], [hex] REQUIRED.
+  Datasets:
+    - Path: Data/Generated/Datasets/Catch_In
+      Hash: 86e87cf3c49dc701ebbf65daf2294cd40f8a0cec8600d3054e1ae9855d1fed71
+    - Path: Data/Generated/Datasets/Catch_Near
+      Hash: 201c69844a28d8b9e23d1a04a48422bedd8b7c53e0021232f669949baff7ef65
+    - Path: Data/Generated/Datasets/Default
+      Hash: 916ea9fcdefb246d5da94119b73dac6446792bd6a81a214c1c53f9edf6b8b74a
+  # The datasets, among Datasets, whose validation partitions calibrate the margins; the validation rates are in-sample
+  # for the margins and the test partitions give the honest rates. Source: owner, 2026-11-21, F9 Q7. [path] REQUIRED.
+  Calibration: [Data/Generated/Datasets/Catch_In, Data/Generated/Datasets/Catch_Near]
+  # The quantile of the cross-track margin per axis and of the time margin, per stage and horizon bin, in (0, 1). Source:
+  # owner, 2026-11-21, F9 Q6, fixed before the data (F9 Part A, scratch: 0.90 the first quantile without a false go on
+  # the simulated validation partitions, 0.95 one step above it). [-] REQUIRED.
+  Quantile: 0.95
+  # The prefixes' N at which the decision is made, in order; a throw goes at the first stage that says go. Source:
+  # owner, 2026-11-21, F9 Q8 (N = 10 left out: the only false-go cases of F9 Part A). [-] REQUIRED.
+  Stages: [20, 40]
+  # The parent folder of the decisions, <Output_Folder>/<Run.Name>/<partition>/ (SPEC §9.12). [path] REQUIRED.
+  Output_Folder: Data/Generated/Decisions
+
+# The interception planner (the second stage of scripts/catch.py catch; SPEC §2.9, §7.11, §8.1, §9.13; F10; owner,
+# 2026-11-21, Part A
+# answers): the decision at every observed sample with a ladder of margins, then the robot re-planned one plan at a time
+# to the cup's catch pose, checked along its path by exact distances, and the result at the true crossing of the cup's
+# mouth. Kinematic, with the tracking by the vendored servos; no contact (F11). Simulated throws only (SPEC §2.14).
+Interception:
+  # The ladder: a decision at N observed samples (from the first stage on, at every sample) uses the margins of the
+  # largest stage <= N; it holds Decision.Stages (F9's stages, the baseline). Source: owner, 2026-11-21, F10 Q3 (Part A's
+  # E4: the margins shrink with N, 27.5 mm at N 20 to 17.5 mm at N 150 in x at 0.4 s; at N 200 too few errors). [-] REQUIRED.
+  Stages: [20, 25, 30, 35, 40, 50, 60, 70, 80, 100, 120, 150]
+  # The datasets, among Decision.Datasets, whose TRAIN partitions calibrate the ladder's margins (at Decision.Quantile),
+  # so that the validation partitions stay an out-of-sample check before the counted read. Source: owner, 2026-11-21,
+  # F10 Q3. [path] REQUIRED.
+  Calibration: [Data/Generated/Datasets/Catch_In, Data/Generated/Datasets/Catch_Near]
+  # The motion-capture latency from a sample's capture to its arrival at the planner: the Qualisys camera family's
+  # "down to 4 ms" (SPEC §4.3), the lower bound, assumed. Source: owner, 2026-11-21, F10 Q9. [s] REQUIRED.
+  Latency: 0.004
+  # The time one plan takes, from its start (the newest sample seen) to its goal at the robot (the prediction, the catch
+  # pose and the path check), fixed so that every result is reproducible, never the wall clock. Source: owner,
+  # 2026-11-21, F10 Q2 (Part A, one process, one thread: the prediction 0.7-2.8 ms, the pose 1.7 ms, the path check about
+  # 25 ms per plan; the interception's rate within 1 point of re-planning at every sample). [s] REQUIRED.
+  Compute_Budget: 0.05
+  # The robot rests at its goal at least this long before the catch time; a plan that would not is not accepted. Source:
+  # owner, 2026-11-21, F10 Q9, assumed (Part A: the true margin's minimum 26 ms with it). [s] REQUIRED.
+  Guard: 0.03
+  # The largest motion of any robot point between two poses of a path check; each pose then keeps Catch.Clearance plus
+  # one step to the environment and plus two steps between the robot's parts (both move), so that the clearance holds
+  # between the poses. Source: owner, 2026-11-21, F10 Q6 (Part A: the self clearance along the paths 0.0578 m, which the
+  # certificate at 5 mm would hold to 0.048 m only). [m] REQUIRED.
+  Path_Step: 0.0025
+  # The largest angle between the cup's axis and the ball's reversed velocity at the crossing of the cup's mouth plane.
+  # Source: owner, 2026-11-21, F10 Q1, assumed (Part A: 1.2 deg at the 99th percentile). [deg] REQUIRED.
+  Angle_Tolerance: 10.0
+  # How the robot catches: static, at rest in the catch pose the guard before the catch time (F10, F11); moving, on a
+  # stroke along the ball's path (F15): from rest at the stroke's start every joint runs on one straight joint line
+  # through the catch pose, its speed peaks at the predicted contact with the cup's bottom and it brakes at the limit at
+  # once. Both stay runnable; a moving run writes into <Output_Folder>/<Run.Name>/moving/. Source: owner, 2026-11-23, F15
+  # Q1, Q2, Q5, Q6 (Part A: at a restitution of 0.29 the moving catch retains 98 / 97 % of the goes at 800 / 400 deg/s^2,
+  # the static one 26 / 27 %; a stroke braked at half the limit loses half of them at 0.45). The shipped mode is moving
+  # (Q5); the static catch's results of F10 and F11 are reproduced with static. [-] REQUIRED.
+  Catch_Mode: moving
+  # A moving catch: the cup's speed along the ball at the stroke's peak, as fractions of the largest speed the joint
+  # speeds allow at the catch pose, in the order they are tried; the first whose stroke is in time and certified is
+  # taken, and without one the plan is the static one. Decreasing, each in (0, 1]. Source: owner, 2026-11-23, F15 Q3
+  # (Part A: without the ladder 184 of 224 goes at 400 deg/s^2 fall back to the static plan). [-] REQUIRED.
+  Stroke_Scales: [1.0, 0.75, 0.5, 0.25]
+  # A moving catch: the time one plan takes (as Compute_Budget, fixed, never the wall clock): the stroke's path is
+  # checked beside the approach's. ASSUMED. Source: owner, 2026-11-23, F15 Q4 (Part A, scratch, one process: 71-75 ms
+  # per plan at the median, 91-123 ms at the 95th percentile, against 15-16 ms for a static plan). [s] REQUIRED.
+  Stroke_Compute_Budget: 0.1
+  # The parent folder of the interceptions, <Output_Folder>/<Run.Name>/<partition>/ (SPEC §9.13). [path] REQUIRED.
+  Output_Folder: Data/Generated/Interceptions
+
+# The physical catch (the third stage of scripts/catch.py catch; SPEC §2.10, §7.11, §8.1, §9.14; F11; owner, 2026-11-22,
+# Part A answers):
+# every go of the interception simulated in the scene, the robot driven by its plan, the ball flown from its release and
+# met by the cup's own shape. The values below are set on the compiled scene in memory; models/ keeps the scene's own.
+# Simulated throws only (SPEC §2.14). The ball's material was not measured: every contact value is assumed.
+Contact:
+  # The simulation step of a catch, a whole fraction of the scene's 0.002 s (the control period stays 0.002 s). Source:
+  # owner, 2026-11-22, F11 Q5 (Part A: at 0.002 s a bouncy contact gains energy; at 0.00025 s the restitution moves by
+  # less than 0.01 against half the step). [s] REQUIRED.
+  Step: 0.00025
+  # The ball's contact with everything it touches, MuJoCo's solref: the time constant and the damping ratio. The nominal
+  # pair gives a restitution of 0.19 at 7 and 3 m/s and 0.16 at 1 m/s on the floor (SPEC §4.14), the owner's estimate
+  # for the real ball, 0.20, assumed (owner, 2026-11-22, F11 Q1: rubber-like, with its markers, it would barely bounce
+  # from 1 m). MuJoCo raises a time constant below two steps to two steps, so such a value is refused here. [s], [-] REQUIRED.
+  Time_Constant: 0.004
+  Damping_Ratio: 0.7
+  # The ball's friction: sliding [-], torsional [m], rolling [m]. Source: owner, 2026-11-22, F11 Q5, assumed (Part A: a
+  # sliding friction of 0.3 to 1.0 moves the catches by 4 points; the rolling friction is MuJoCo's default and decides
+  # only when a retained ball comes to rest, addendum). REQUIRED.
+  Friction: [0.5, 0.005, 0.0001]
+  # The settle window: a throw is caught when the ball is retained at the catch time plus this, its centre below the cup's
+  # mouth plane and within the opening's radius of the cup's axis. Source: owner, 2026-11-22, F11 Q2, assumed (Part A: at
+  # rest at most 1.62 s after the catch time; the retained count the same from 1 s to 6 s, addendum). [s] REQUIRED.
+  Settle_Time: 2.5
+  # At rest, the secondary measure (SPEC §2.10): the ball inside the cup with a speed relative to it below Rest_Speed for
+  # Rest_Time. Source: owner, 2026-11-09, assumed. [m/s], [s] REQUIRED.
+  Rest_Speed: 0.05
+  Rest_Time: 0.2
+  # The sensitivity levels, each [time constant s, damping ratio], simulated on the validation partitions with the run's
+  # first seed only, never on the test partitions: restitutions of 0.12 (the stiffer pair, addendum Q2), 0.29, 0.35, 0.45
+  # and 0.56 at 7 m/s on the floor (SPEC §4.14; 0.35 and 0.56 measured in F15's Part A: 0.347 and 0.560, the mean over
+  # the phase of the first contact within a step). A moving catch simulates each of them, and the nominal contact, a
+  # second time with the ball's markers as collision shapes (the markers variant, in memory). Source: owner, 2026-11-22,
+  # F11 Q1; 2026-11-23, F15 Q12, Q13 (the moving catch's cliff lies between 0.35 and 0.56). REQUIRED.
+  Levels: [[0.00157, 0.9], [0.004, 0.5], [0.004, 0.4], [0.004, 0.3], [0.004, 0.2]]
+  # The robustness sweep (scripts/Maintenance/derive.py sweep; owner, 2026-11-11, Q8; 2026-11-22, F11 Q10): the scales of the injected
+  # prediction error, 1 the level of the stored real-flight errors, and the first validation throws of each dataset of
+  # Decision.Datasets it runs on (Part A ran 600 and 1 000). [-], [int] REQUIRED.
+  Sweep_Scales: [0.0, 0.5, 1.0, 1.5, 2.0, 3.0]
+  Sweep_Throws: 1500
+  # The parent folder of the catches, <Output_Folder>/<Run.Name>/<partition or sweep>/ (SPEC §9.14). [path] REQUIRED.
+  Output_Folder: Data/Generated/Catches
+  # The ledger of catch's test-partition reads, one row per call of the whole chain (owner, 2026-11-22, F11 Q9; 2026-11-23,
+  # Q3: the decision's and the interception's own ledgers are closed records beside it). [path] REQUIRED.
+  Ledger_File: Data/Generated/Evaluations/catch_ledger.csv

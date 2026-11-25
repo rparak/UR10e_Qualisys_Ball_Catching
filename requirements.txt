@@ -1,0 +1,20 @@
+# The configuration loader (src/Configuration/Core.py): the strict YAML reader.
+PyYAML==6.0.3
+# The test suite.
+pytest==9.2.0
+# The test suite in parallel (-n 8): test-only; the suite also passes without it, serially.
+pytest-xdist==3.8.0
+# Arrays and linear algebra (src/Geometry, src/Flight): the version installed and run with F1 (2026-11-09).
+numpy==2.4.6
+# The learned predictors' training (src/Learning/Models.py, Training.py; F8): the version installed and measured
+# 2026-11-17, one wheel for macOS arm64 with the CPU and MPS backends. Inference needs NumPy only.
+torch==2.15.0
+# The scene, the robot's kinematics and the exact distances (src/Scene, src/Robot; F4): the version pinned by
+# decision (SPEC §5: MuJoCo is pinned at 3.16.0), installed and run 2026-11-20, one wheel for macOS arm64.
+mujoco==3.16.0
+# The figures of scripts/plots.py (src/Plot; the visualisation, delivery 2): the versions installed and run
+# 2026-11-24. matplotlib brings contourpy, cycler, fonttools, kiwisolver, pillow, pyparsing and python-dateutil (with tzdata), unpinned
+# like execnet (SPEC §5).
+matplotlib==3.11.2
+# SciencePlots' 'science' style.
+SciencePlots==2.2.2

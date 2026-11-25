@@ -1,0 +1,97 @@
+## =========================================================================== ##
+#   Description:
+#     The dataset configuration of the ball-catching simulation (SPEC §8.2; F6).
+#     Read only by src/Configuration/Core.py (Load_Dataset_Configuration); written by hand. Given to
+#     scripts/catch.py dataset through --config; a copy is stored with every dataset it generates.
+#
+#   REQUIRED: every field is required; a missing or invalid field fails the load, naming it.
+#   Units: in brackets after each field's comment; [m], [s], [m/s], [Hz].
+#   Frames: the robot base frame of the system configuration (the thrower at -y, SPEC §14.4).
+#   Paths: repository-relative.
+## =========================================================================== ##
+
+# The dataset: its name, its seed and its size.
+Dataset:
+  # The dataset's folder under Output.Folder; letters, digits, _ and - only. Source: the user. [-] REQUIRED.
+  Name: Noise_0
+  # The root of the per-flight random streams: flight i draws from np.random.SeedSequence(Seed).spawn
+  # stream i (SPEC §7.6), so a flight depends on the seed and its index only. Source: the user. [-] REQUIRED.
+  Seed: 20261111
+  # The number of flights over all partitions (7000 / 1500 / 1500 at the ratios below). Source: owner,
+  # 2026-11-11, a round number; whether it suffices for training is measured by F8's learning curve. [-] REQUIRED.
+  Flights: 10000
+  # The system configuration read for the areas, the transform, the flight model and the observation
+  # model's parameters; its copy and hash go into the manifest. [path] REQUIRED.
+  System_Configuration: Config/ball_catching.yaml
+
+# The partitions, by flight, sized by the largest-remainder rule (SPEC §7.6); they sum to 1.
+Partitions:
+  # The share of the train partition, > 0. Source: assumed (SPEC §8.2). [-] REQUIRED.
+  Train: 0.70
+  # The share of the validation partition, > 0. Source: assumed. [-] REQUIRED.
+  Validation: 0.15
+  # The share of the test partition, > 0. Source: assumed. [-] REQUIRED.
+  Test: 0.15
+
+# The throws (SPEC §7.6; owner, 2026-11-11, F6 Q7-Q9; 2026-11-15, Q5): a release from a Gaussian truncated to
+# Areas.Throw, a target uniform in Target_Area, a flight time from an apex height drawn from a Gaussian, the
+# release velocity solved by shooting under the flight model.
+Throw:
+  # The mean of the releases per axis. Source: scripts/Maintenance/derive.py observation (F6): the 44 identification
+  # releases (the fitted state at the first sample after the 40 ms trim, robot frame; 100 Hz ON Experiment
+  # 6 excluded as a late start). [m] REQUIRED.
+  Release_Mean: [-0.150164349, -4.78481944, 1.17412229]
+  # The standard deviation of the releases per axis, each > 0. Source: as Release_Mean (population sd).
+  # [m] REQUIRED.
+  Release_Std: [0.796431199, 0.409536725, 0.115578281]
+  # The mean apex height (robot frame z) of the throws. Source: as Release_Mean, the apex of each fitted
+  # trajectory on the 1/600 s grid. [m] REQUIRED.
+  Apex_Mean: 2.60796503
+  # The standard deviation of the apex height, > 0 (the measured spread, no assumed factor; owner,
+  # 2026-11-11, F6 Q9). Source: as Apex_Mean. [m] REQUIRED.
+  Apex_Std: 0.227154197
+  # [min, max] of the time from the release to the target; a throw outside is drawn again. Source: the
+  # identification flights' times inside the robot hemisphere, 0.963-1.377 s (F6 Part A), with a margin,
+  # assumed (owner, 2026-11-11, Q9). [s] REQUIRED.
+  Flight_Time: [0.95, 1.40]
+  # [min, max] of the release speed; a throw outside is drawn again. Source: the identification releases,
+  # 5.83-7.56 m/s (F6 Part A), with a margin, assumed (owner, 2026-11-11, Q9). [m/s] REQUIRED.
+  Release_Speed: [5.5, 8.0]
+  # The area the throws are aimed into: of a sphere, the half of its upper hemisphere on the thrower's side (a
+  # quarter sphere). It is the targets' own area, wider than Areas.Robot (r 1.0 m), in which the robot catches,
+  # so some simulated throws cannot be caught (owner, 2026-11-15, Q5; SPEC §7.6).
+  Target_Area:
+    # Centre of the sphere. Source: the centre of Areas.Robot (owner, 2026-11-15, Q5). [m] REQUIRED.
+    Centre: [0.0, 0.0, 0.3607]
+    # Orientation as rotations about x, y, z (applied X then Y then Z); [0, 0, -90] puts the kept half on the
+    # thrower's side (-y), as Areas.Robot.Orientation; an orientation that does not face the thrower is refused.
+    # Source: the frame decision (SPEC §14.4). [deg] REQUIRED.
+    Orientation: [0.0, 0.0, -90.0]
+    # Radius, > 0. Source: measured on the 45 identification flights only (Part A, 2026-11-15, and
+    # scripts/Maintenance/derive.py observation): with 1.5 m, 42 of them lie in the support of the generated throws (39 with
+    # the robot area's 1.0 m) and 1 of the 12 throw-shape statistics is outside its bound; 1.25 m gives 40 and 2,
+    # 1.65 m 44 and 2 (owner, 2026-11-15, Q5). [m] REQUIRED.
+    Radius: 1.5
+
+# The observation model's choices (SPEC §7.5); its measured parameters are in the system configuration.
+Observation:
+  # The rates; each flight draws one. 370 Hz is optional and replays the 300 Hz donors (an extrapolation,
+  # assumed; owner, 2026-11-11, F6 Q4); other rates have no donors and are refused by the dataset command.
+  # Source: the recorded rates (SPEC §4.2). [Hz] REQUIRED.
+  Rates: [100, 200, 300]
+  Noise:
+    # A multiplier of the whole position error, >= 0, for robustness datasets. Source: 1.0, the measured
+    # model. [-] REQUIRED.
+    Scale: 0.0
+  Dropout:
+    # composed (the identification patterns composed at exponential cuts), recorded (one pattern per
+    # flight) or none (an ablation). Source: owner, 2026-11-11, F6 Q3. [-] REQUIRED.
+    Pattern: composed
+    # all, A or B: the donor pool (F8's pattern check). Source: owner, 2026-11-11, F6 Q11. [-] REQUIRED.
+    Donors: all
+
+# Where the datasets go.
+Output:
+  # The parent folder of the datasets; a dataset is written to Output.Folder/Dataset.Name. Source: SPEC
+  # §9.5. [path] REQUIRED.
+  Folder: Data/Generated/Datasets

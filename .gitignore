@@ -1,0 +1,11 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# macOS
+.DS_Store
+
+# Generated output, one folder per kind (SPEC §6); regenerated, never committed.
+Data/Generated/

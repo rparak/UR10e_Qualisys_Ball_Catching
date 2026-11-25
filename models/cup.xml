@@ -1,0 +1,69 @@
+<!--
+  The cup of the ball-catching simulation (SPEC §2.4, §9.10): the passive conical gripper.
+  Written by scripts/Maintenance/build_scene.py from the CAD; never edited by hand.
+  Frame: the robot's flange site, z along the cup's axis out of its mouth. Lengths in m.
+-->
+<mujoco model="cup">
+  <compiler angle="radian" meshdir="meshes"/>
+  <option integrator="implicitfast"/>
+  <asset>
+    <mesh name="cup" file="cup.stl" scale="0.001 0.001 0.001"/>
+  </asset>
+  <worldbody>
+    <body name="cup">
+      <inertial pos="0.000000056 -0.000000088 0.100747696" mass="0.47568084" fullinertia="0.002499728 0.002499681 0.001568074 0 0.000000004 0.000000003"/>
+      <geom name="cup_visual" type="mesh" mesh="cup" quat="0.707106781 0.707106781 0 0" rgba="0.85 0.85 0.87 1" contype="0" conaffinity="0" group="2"/>
+      <geom name="cup_collision" type="cylinder" pos="0 0 0.095" size="0.0765 0.095" rgba="0.9 0.3 0.3 0.4" contype="1" conaffinity="0" group="3"/>
+      <geom name="cup_bottom" type="cylinder" pos="0 0 0.0025" size="0.045 0.0025" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_00" type="box" pos="0.056248447 0 0.092143983" quat="0.461427011 0.535803241 0.535803241 0.461427011" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_01" type="box" pos="0.054331828 0.014558169 0.092143983" quat="0.397251128 0.461283013 0.601155727 0.51770775" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_02" type="box" pos="0.048712584 0.028124224 0.092143983" quat="0.326278169 0.378870105 0.656222272 0.565130366" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_03" type="box" pos="0.039773658 0.039773658 0.092143983" quat="0.249722499 0.289974625 0.700060671 0.602883444" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_04" type="box" pos="0.028124224 0.048712584 0.092143983" quat="0.168894008 0.196117598 0.731920839 0.630321019" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_05" type="box" pos="0.014558169 0.054331828 0.092143983" quat="0.085175694 0.098904944 0.751257638 0.646973628" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_06" type="box" pos="0 0.056248447 0.092143983" quat="0 0 0.75774021 0.652556337" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_07" type="box" pos="-0.014558169 0.054331828 0.092143983" quat="-0.085175694 -0.098904944 0.751257638 0.646973628" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_08" type="box" pos="-0.028124224 0.048712584 0.092143983" quat="-0.168894008 -0.196117598 0.731920839 0.630321019" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_09" type="box" pos="-0.039773658 0.039773658 0.092143983" quat="-0.249722499 -0.289974625 0.700060671 0.602883444" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_10" type="box" pos="-0.048712584 0.028124224 0.092143983" quat="-0.326278169 -0.378870105 0.656222272 0.565130366" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_11" type="box" pos="-0.054331828 0.014558169 0.092143983" quat="-0.397251128 -0.461283013 0.601155727 0.51770775" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_12" type="box" pos="-0.056248447 0 0.092143983" quat="-0.461427011 -0.535803241 0.535803241 0.461427011" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_13" type="box" pos="-0.054331828 -0.014558169 0.092143983" quat="-0.51770775 -0.601155727 0.461283013 0.397251128" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_14" type="box" pos="-0.048712584 -0.028124224 0.092143983" quat="-0.565130366 -0.656222272 0.378870105 0.326278169" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_15" type="box" pos="-0.039773658 -0.039773658 0.092143983" quat="-0.602883444 -0.700060671 0.289974625 0.249722499" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_16" type="box" pos="-0.028124224 -0.048712584 0.092143983" quat="-0.630321019 -0.731920839 0.196117598 0.168894008" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_17" type="box" pos="-0.014558169 -0.054331828 0.092143983" quat="-0.646973628 -0.751257638 0.098904944 0.085175694" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_18" type="box" pos="0 -0.056248447 0.092143983" quat="-0.652556337 -0.75774021 0 0" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_19" type="box" pos="0.014558169 -0.054331828 0.092143983" quat="-0.646973628 -0.751257638 -0.098904944 -0.085175694" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_20" type="box" pos="0.028124224 -0.048712584 0.092143983" quat="-0.630321019 -0.731920839 -0.196117598 -0.168894008" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_21" type="box" pos="0.039773658 -0.039773658 0.092143983" quat="-0.602883444 -0.700060671 -0.289974625 -0.249722499" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_22" type="box" pos="0.048712584 -0.028124224 0.092143983" quat="-0.565130366 -0.656222272 -0.378870105 -0.326278169" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_wall_23" type="box" pos="0.054331828 -0.014558169 0.092143983" quat="-0.51770775 -0.601155727 -0.461283013 -0.397251128" size="0.009452649 0.088478899 0.0024" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_00" type="box" pos="0.0695 0 0.185" quat="1 0 0 0" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_01" type="box" pos="0.067131845 0.017987924 0.185" quat="0.991444861 0 0 0.130526192" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_02" type="box" pos="0.060188766 0.03475 0.185" quat="0.965925826 0 0 0.258819045" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_03" type="box" pos="0.049143921 0.049143921 0.185" quat="0.923879533 0 0 0.382683432" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_04" type="box" pos="0.03475 0.060188766 0.185" quat="0.866025404 0 0 0.5" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_05" type="box" pos="0.017987924 0.067131845 0.185" quat="0.79335334 0 0 0.608761429" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_06" type="box" pos="0 0.0695 0.185" quat="0.707106781 0 0 0.707106781" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_07" type="box" pos="-0.017987924 0.067131845 0.185" quat="0.608761429 0 0 0.79335334" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_08" type="box" pos="-0.03475 0.060188766 0.185" quat="0.5 0 0 0.866025404" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_09" type="box" pos="-0.049143921 0.049143921 0.185" quat="0.382683432 0 0 0.923879533" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_10" type="box" pos="-0.060188766 0.03475 0.185" quat="0.258819045 0 0 0.965925826" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_11" type="box" pos="-0.067131845 0.017987924 0.185" quat="0.130526192 0 0 0.991444861" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_12" type="box" pos="-0.0695 0 0.185" quat="0 0 0 1" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_13" type="box" pos="-0.067131845 -0.017987924 0.185" quat="-0.130526192 0 0 0.991444861" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_14" type="box" pos="-0.060188766 -0.03475 0.185" quat="-0.258819045 0 0 0.965925826" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_15" type="box" pos="-0.049143921 -0.049143921 0.185" quat="-0.382683432 0 0 0.923879533" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_16" type="box" pos="-0.03475 -0.060188766 0.185" quat="-0.5 0 0 0.866025404" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_17" type="box" pos="-0.017987924 -0.067131845 0.185" quat="-0.608761429 0 0 0.79335334" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_18" type="box" pos="0 -0.0695 0.185" quat="-0.707106781 0 0 0.707106781" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_19" type="box" pos="0.017987924 -0.067131845 0.185" quat="-0.79335334 0 0 0.608761429" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_20" type="box" pos="0.03475 -0.060188766 0.185" quat="-0.866025404 0 0 0.5" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_21" type="box" pos="0.049143921 -0.049143921 0.185" quat="-0.923879533 0 0 0.382683432" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_22" type="box" pos="0.060188766 -0.03475 0.185" quat="-0.965925826 0 0 0.258819045" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <geom name="cup_lip_23" type="box" pos="0.067131845 -0.017987924 0.185" quat="-0.991444861 0 0 0.130526192" size="0.007 0.010071416 0.005" rgba="0.9 0.3 0.3 0.4" contype="0" conaffinity="2" group="3"/>
+      <site name="cup_mouth" pos="0 0 0.19" size="0.005"/>
+    </body>
+  </worldbody>
+</mujoco>

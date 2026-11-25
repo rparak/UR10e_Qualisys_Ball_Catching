@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "UR10e Robot Arm Catches a Thrown Ball with AI Prediction in MuJoCo"
+abstract: >-
+  A MuJoCo simulation of a UR10e robot arm with a passive cone-shaped cup that catches a thrown ball. The ball's
+  flight model is identified from 90 real throws recorded with a Qualisys motion-capture system; a learned predictor
+  forecasts the rest of a flight from its first observed points, a conservative decision says whether the ball can be
+  caught, and the robot meets the ball in motion, with the catch simulated with contact. Every output is a simulation
+  result; nothing is run on, or validated on, the real UR10e.
+authors:
+  - family-names: Parak
+    given-names: Roman
+    affiliation: "Johannes Kepler University Linz, Institute of Robotics"
+version: "1.0"
+date-released: "2026-11-25"
+license: MIT
+repository-code: "https://github.com/rparak/UR10e_Qualisys_Ball_Catching"
+keywords:
+  - MuJoCo
+  - robotics
+  - UR10e
+  - ball catching
+  - trajectory prediction
+  - motion capture
+  - Qualisys
+  - simulation
