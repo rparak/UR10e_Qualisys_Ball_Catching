@@ -7,7 +7,7 @@
 > [!WARNING]
 > **Simulation only.** Every output is a simulation result. Nothing is run on, or validated on, the real UR10e.
 
-▶ **[Watch the video (79 s)](https://www.youtube.com/@RomanParak/videos)**
+▶ **[Watch the video (79 s)](https://www.youtube.com/watch?v=DXlsKa0tlEc)**
 
 A UR10e robot arm with a passive, cone-shaped cup catches a thrown ball in a MuJoCo simulation. The ball's flight
 model is identified from 90 real throws recorded with a 12-camera Qualisys motion-capture system. A learned
