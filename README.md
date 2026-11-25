@@ -25,9 +25,17 @@ The learned predictor is trained with PyTorch and runs in NumPy.
 
 ## How it works
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="Media/readme_pipeline_dark.png">
+  <img src="Media/readme_pipeline_light.png" alt="Diagram from throw to catch: throw, motion capture, the AI prediction used by the robot and the numerical one for comparison, the go / no-go decision, the moving catch in MuJoCo" width="100%">
+</picture>
+
+**Figure 2:** From throw to catch: the robot acts on the AI prediction, the numerical one being the comparison. The
+observation model was identified from 45 of the 90 real Qualisys recordings. The other 45 are held out for evaluation.
+
 ![The simulated cell from the side: the throw area on the right, the ball's flight, the robot with its catch area on the left](Media/readme_hero.jpg)
 
-**Figure 2:** The simulated cell from the side: the throw is detected in the throw area (right), and the robot
+**Figure 3:** The simulated cell from the side: the throw is detected in the throw area (right), and the robot
 catches inside its catch area (left, green). A validation throw of the `Catch_In` dataset, simulated.
 
 1. **Data.** 90 real flights (100, 200 and 300 Hz) give the flight model, gravity with quadratic drag
@@ -38,15 +46,25 @@ catches inside its catch area (left, green). A validation throw of the `Catch_In
    observed samples with a Chebyshev basis of degree 6 as its output, trained in PyTorch), and `GLS_M4`, the numerical
    predictor (a physics model with a Gauss–Newton fit under the flight model, weighted by the observation model's
    covariance).
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="Media/readme_model_dark.png">
+  <img src="Media/readme_model_light.png" alt="Diagram of the AI model: the first N samples, a GRU encoder, Chebyshev coefficients, the whole trajectory to the floor" width="100%">
+</picture>
+
+**Figure 4:** The AI model, `QT_BASIS`: a GRU encodes the first N samples, and the Chebyshev coefficients it returns
+give the ball's position at any time up to 2 s ahead, to the floor.
+
 3. **Decision.** At every new sample the predicted catch point must clear cross-track and time margins, calibrated
    on simulated data at the 95 % quantile, inside the catch area the robot reaches in time. When in doubt, no move.
 4. **Moving catch.** The robot is re-planned at every sample with time-optimal joint profiles within the UR10e's
    limits, every path checked for collisions by exact distances. It then meets the ball with a stroke along the
    ball's path, so that the ball arrives with less speed relative to the cup, and the catch is simulated with contact.
 
-<p align="center"><img src="Media/readme_prediction.gif" alt="The predicted path converging on the true flight as samples arrive, side view" width="720"></p>
+<p align="center"><img src="Media/readme_prediction.gif" alt="The predicted path converging on the true flight as samples arrive, then a slow zoom to the robot catching the ball, side view" width="720"></p>
 
-**Figure 3:** The prediction converging as the observed samples arrive (side view of a simulated throw).
+**Figure 5:** The prediction converging as the observed samples arrive, then the catch, slowed down and zoomed in
+(side view of a simulated throw).
 
 ## Key results
 
@@ -74,7 +92,7 @@ The catch rates hold for an *assumed* restitution of the ball of 0.20 and an *as
   <img src="Media/readme_comparison_bars_light.png" alt="Bar chart: prediction error and inference time of QT_BASIS and GLS_M4 at N = 10, 20, 40, simulated and real" width="100%">
 </picture>
 
-**Figure 4:** (a) The prediction error (median over the flights of the RMS over the rest of the flight) after N
+**Figure 6:** (a) The prediction error (median over the flights of the RMS over the rest of the flight) after N
 observed samples, on the simulated test throws (plain) and the 45 real held-out flights (hatched). The error bar is
 the range over `QT_BASIS`'s 5 training seeds. (b) The inference time per prediction, median and 90th percentile.
 Same accuracy, about 58 times faster. From the stored final evaluations.
@@ -84,7 +102,7 @@ Same accuracy, about 58 times faster. From the stored final evaluations.
   <img src="Media/readme_prediction_error_light.png" alt="Position error against the prediction horizon at N = 20, simulated test throws and real flights" width="100%">
 </picture>
 
-**Figure 5:** The position error against the prediction horizon after 20 observed samples, (a) on the simulated test
+**Figure 7:** The position error against the prediction horizon after 20 observed samples, (a) on the simulated test
 throws (against the exact truth), (b) on the 45 real held-out flights (against the recorded samples). The median is a
 solid line, the 90th percentile dotted.
 
@@ -93,7 +111,7 @@ solid line, the 90th percentile dotted.
   <img src="Media/readme_prediction_light.png" alt="Both predictions converging on one simulated throw as N grows, and their error against the time" width="100%">
 </picture>
 
-**Figure 6:** Both predictors on one simulated validation throw (`Default` 8327, chosen by a stated rule as a
+**Figure 8:** Both predictors on one simulated validation throw (`Default` 8327, chosen by a stated rule as a
 typical one), from the first N samples against the true path, and their position error against the time.
 
 <picture>
@@ -101,7 +119,7 @@ typical one), from the first N samples against the true path, and their position
   <img src="Media/readme_real_light.png" alt="A real recorded flight in its side view with both predictions, and the position error against the horizon" width="100%">
 </picture>
 
-**Figure 7:** A real recorded flight: (a) the side view with both predictions from the first 20 samples, (b) the
+**Figure 9:** A real recorded flight: (a) the side view with both predictions from the first 20 samples, (b) the
 position error against the horizon for N = 10, 20, 40. It is one of the 45 flights that shaped the models, so a
 demonstration, not an independent evaluation, placed in the robot frame by an assumed transform.
 
@@ -110,7 +128,7 @@ demonstration, not an independent evaluation, placed in the robot frame by an as
   <img src="Media/readme_catch_light.png" alt="Share of the goes retained against the ball's restitution, static and moving catch" width="100%">
 </picture>
 
-**Figure 8:** The share of the go decisions whose ball stays in the cup, against the ball's restitution, for the
+**Figure 10:** The share of the go decisions whose ball stays in the cup, against the ball's restitution, for the
 static and the moving catch (`Catch_In` and `Catch_Near` validation throws, seed 0). The moving catch moves the cliff
 from about 0.25 to about 0.47 / 0.38 (800 / 400 °/s²). The nominal restitution, 0.20, is assumed.
 
@@ -119,7 +137,7 @@ from about 0.25 to about 0.47 / 0.38 (800 / 400 °/s²). The nominal restitution
   <img src="Media/readme_motion_light.png" alt="One moving catch: the cup's and the ball's speed and the distance from the mouth to the ball against the time, with the phases" width="100%">
 </picture>
 
-**Figure 9:** One moving catch (`Catch_In` validation throw 1000, 800 °/s²): the cup's speed along the ball beside the
+**Figure 11:** One moving catch (`Catch_In` validation throw 1000, 800 °/s²): the cup's speed along the ball beside the
 ball's speed, with the phases observe, move, wait, stroke, brake and rest. The ball meets the cup at 6.07 m/s
 relative speed against 7.80 m/s for the static catch of the same throw.
 
@@ -217,7 +235,7 @@ Some tests read the stored generated data and are skipped in a fresh clone, wher
   mass, the joint acceleration, the motion-capture latency and the planner's compute budget are assumed.
 - The throws the robot catches are simulated. Real throws identify the models and measure the prediction error.
 - The catch stands or falls with the assumed restitution: above about 0.47 (800 °/s², or 0.38 at 400 °/s²) fewer than
-  half of the balls stay in the cup (Figure 8).
+  half of the balls stay in the cup (Figure 10).
 
 The full list is in [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md).
 

@@ -135,7 +135,7 @@ def test_every_image_the_readme_shows_is_in_media_within_the_budgets_and_each_pi
     assert max(sizes.values()) <= CONST_MAX_IMAGE, sizes
     assert sum(sizes.values()) <= CONST_MAX_MEDIA
     pictures = re.findall(r'<picture>(.*?)</picture>', text, re.S)
-    assert len(pictures) == 6
+    assert len(pictures) == 8
     for picture in pictures:
         dark = re.search(r'media="\(prefers-color-scheme: dark\)" srcset="Media/(readme_\w+)_dark\.png"', picture)
         light = re.search(r'<img src="Media/(readme_\w+)_light\.png"', picture)
